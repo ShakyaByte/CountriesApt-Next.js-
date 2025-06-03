@@ -1,103 +1,112 @@
-import Image from "next/image";
+"use client"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useRouter } from "next/navigation"; //nexjs Router For navigation
+export default function loginpage() {
+  const router = useRouter();
+  // ZOD Validation
+  const LoginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8, "Password must be 8 characters"),
+    ConfirmPassword: z.string(),
+  }).refine(data => data.password === data.ConfirmPassword, {
+    message: "Passwords do not match",
+    path: ["ConfirmPassword"],
+  });
 
-export default function Home() {
+   //added T for Type of Schema
+  type TLoginSchema = z.infer<typeof LoginSchema>;
+
+  //React HOOK Form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }, //prevents 
+    reset,
+    getValues, //to match the passwords
+  } = useForm<TLoginSchema>({
+    resolver: zodResolver(LoginSchema), //Adding Z Schema to React form 
+  });
+
+  const onSubmit = async (data: TLoginSchema) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    reset();
+    router.push("/country"); // Navigate to /country after successful submit
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-200 to-purple-100 px-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full max-w-md p-8 bg-white rounded-3xl shadow-2xl space-y-6 [box-shadow:0px_0px_10px_1.4px_rgba(0,0,0,0.6)] 
+          mx-[5%] my-[10%] sm:mx-auto sm:my-auto"
+      >
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">
+          Login
+        </h2>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div className="flex flex-col">
+          <label className="mb-1 font-medium text-gray-700">Email</label>
+          <input
+            {...register("email", {
+              required: "Email is required",
+            })}
+            type="email"
+            placeholder="Email"
+            className="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          />
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">{`${errors.email.message}`}</p>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        <div className="flex flex-col">
+          <label className="mb-1 font-medium text-gray-700">Password</label>
+          <input
+            {...register("password", {
+              required: "Password is required",
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters",
+              },
+            })}
+            type="password"
+            placeholder="Password"
+            className="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">{`${errors.password.message}`}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col">
+          <label className="mb-1 font-medium text-gray-700">Confirm Password</label>
+          <input
+            {...register("ConfirmPassword", {
+              required: "Confirm password is required",
+              validate: (value) =>
+                value === getValues("password") || "Passwords do not match",
+            })}
+            type="password"
+            placeholder="Confirm Password"
+            className="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2  focus:ring-gray-500"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {errors.ConfirmPassword && (
+            <p className="text-red-500 text-sm mt-1">{`${errors.ConfirmPassword.message}`}</p>
+          )}
+        </div>
+
+        <div className="pt-2">
+          <button
+            disabled={isSubmitting}
+            className="w-full bg-gray-700 p-3 rounded-xl text-white font-semibold hover:bg-gray-800 
+            transition duration-300 ease-in-out cursor-pointer"
+          >
+            {isSubmitting ? "Logging in..." : "Login"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

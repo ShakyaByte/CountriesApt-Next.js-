@@ -1,6 +1,6 @@
 import React from 'react';
 
-// React unctional Component for spinner
+// React functional Component for spinner
 const LoadingSpinner: React.FC = () => (
   <div className="text-center py-12">
     <div className="inline-flex items-center px-4 py-2 text-gray-600">
